@@ -4,6 +4,7 @@ from fastapi.responses import FileResponse
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import FileRecord
+from models import Base
 
 app = FastAPI()
 
@@ -28,6 +29,8 @@ Session = sessionmaker(bind=engine)
 # Configura el cliente de S3 con la región especificada
 s3 = boto3.client('s3', region_name=aws_region)
 
+# Crear la tabla si no existe
+Base.metadata.create_all(engine)
 
 # Ruta para cargar un archivo
 @app.post("/upload/")
