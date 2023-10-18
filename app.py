@@ -6,6 +6,7 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)  # Esto habilitará CORS para todas las rutas
+
 # Configuración de AWS S3
 s3 = boto3.client(
     's3',
@@ -26,8 +27,12 @@ conn = psycopg2.connect(
 cur = conn.cursor()
 
 # Crear la tabla 'filelist' si no existe
-cur.execute('CREATE TABLE IF NOT EXISTS filelist (id SERIAL PRIMARY KEY, filename VARCHAR(255), urlfile VARCHAR(255))')
-conn.commit()
+try:
+    cur.execute('CREATE TABLE IF NOT EXISTS filelist (id SERIAL PRIMARY KEY, filename VARCHAR(255), urlfile VARCHAR(255))')
+    conn.commit()
+except Exception as e:
+    print(f'Error {e}')
+    conn.rollback()
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -48,17 +53,26 @@ def upload_file():
     urlfile = f'https://bucketforprojectuploaddownload.s3.amazonaws.com/uploads/{filename}'
 
     # Guardar los datos en la base de datos
-    cur.execute('INSERT INTO filelist (filename, urlfile) VALUES (%s, %s)', (filename, urlfile))
-    conn.commit()
+    try:
+        cur.execute('INSERT INTO filelist (filename, urlfile) VALUES (%s, %s)', (filename, urlfile))
+        conn.commit()
+    except Exception as e:
+        print(f'Error {e}')
+        conn.rollback()
 
     return 'Archivo subido y registrado correctamente', 200
 
 @app.route('/list', methods=['GET'])
 def list_files():
-    cur.execute('SELECT * FROM filelist')
-    rows = cur.fetchall()
-
-    return {'files': rows}, 200
+    try:
+        cur.execute('SELECT * FROM filelist')
+        rows = cur.fetchall()
+        return {'files': rows}, 200
+    except Exception as e:
+        print(f'Error {e}')
+        conn.rollback()
+        return 'Error interno del servidor', 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80)
+
