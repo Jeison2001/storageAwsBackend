@@ -1,19 +1,20 @@
-# Usa una imagen base de Python 3.8
-FROM python:3.8
+# Usar una imagen de Node.js
+FROM node:14
 
-# Configura el directorio de trabajo
-WORKDIR /app
+# Crear un directorio de trabajo
+WORKDIR /usr/src/app
 
-# Copia los archivos necesarios al contenedor
-COPY main.py .
-COPY models.py .
-COPY requirements.txt .
+# Copiar los archivos de configuración del paquete
+COPY package*.json ./
 
-# Instala las dependencias
-RUN pip install -r requirements.txt
+# Instalar las dependencias
+RUN npm install
 
-# Expone el puerto 80
+# Copiar el resto del código de la aplicación
+COPY . .
+
+# Exponer el puerto que usa la aplicación
 EXPOSE 80
 
-# Comando para ejecutar la aplicación
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
+# Comando para iniciar la aplicación
+CMD [ "node", "index.js" ]
