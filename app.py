@@ -2,9 +2,10 @@ from flask import Flask, request
 import boto3
 import psycopg2
 from werkzeug.utils import secure_filename
+from flask_cors import CORS
 
 app = Flask(__name__)
-
+CORS(app)  # Esto habilitará CORS para todas las rutas
 # Configuración de AWS S3
 s3 = boto3.client(
     's3',
