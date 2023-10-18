@@ -1,20 +1,17 @@
-# Usar una imagen de Node.js
-FROM node:20.8.0
+# Use an official Python runtime as a parent image
+FROM python:3.9-slim-buster
 
-# Crear un directorio de trabajo
-WORKDIR /usr/src/app
+# Set the working directory in the container to /app
+WORKDIR /app
 
-# Copiar los archivos de configuración del paquete
-COPY package*.json ./
+# Add the current directory contents into the container at /app
+ADD . /app
 
-# Instalar las dependencias
-RUN npm install
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir flask boto3 psycopg2-binary
 
-# Copiar el resto del código de la aplicación
-COPY . .
-
-# Exponer el puerto que usa la aplicación
+# Make port 80 available to the world outside this container
 EXPOSE 80
 
-# Comando para iniciar la aplicación
-CMD [ "node", "index.js" ]
+# Run app.py when the container launches
+CMD ["python", "app.py"]
